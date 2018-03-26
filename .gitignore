@@ -1,7 +1,7 @@
 .sass-cache/*
-node_modules/*
+**/node_modules/*
 target/*
-public/js/*
+**/public/js/*
 .shadow-cljs
 .nrepl-port
 *.css.map
