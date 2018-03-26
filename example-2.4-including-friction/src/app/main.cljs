@@ -3,6 +3,8 @@
 
 (def width 800)
 (def height 400)
+(def c 0.01) ;; coefficient of friction
+(def normal 1) ;; simplified normal force N
 
 (defonce state
   (atom {:movers []
@@ -26,7 +28,7 @@
 
 (defn seed [num]
   (for [i (range num)]
-    (let [m (create 50 50 0 0 0 0 10 (js/randomGaussian 30 20))]
+    (let [m (create (* 50 i) 50 0 0 0 0 10 (js/random 20 50))]
       m)))
 
 (defn bounce-wall [l w h]
@@ -56,16 +58,22 @@
         calc-force (vec/create (:x force) rel-force)]
     (vec/div calc-force mass)))
 
-(defn accumulate-forces [mass force-list]
-  (let [wind (:wind force-list)
+(defn accumulate-forces [mover force-list]
+  (let [mass (:mass mover)
+        vel (:velocity mover)
+        wind (:wind force-list)
         f1 (apply-direct-force mass wind)
         gravity (:gravity force-list)
-        f2 (apply-relative-force mass gravity)]
-    (vec/add f1 f2)))
+        f2 (apply-relative-force mass gravity)
+        frictionMag (* c normal)
+        friction (-> vel
+                     (vec/mult -1)
+                     (vec/normalize)
+                     (vec/mult frictionMag))]
+    (vec/add (vec/add f1 f2) friction)))
 
 (defn apply-forces [mover force-list]
-  (let [mass (:mass mover)
-        f (accumulate-forces mass force-list)
+  (let [f (accumulate-forces mover force-list)
         a f
         v1 (vec/limit (vec/add (:velocity mover) a) (:topspeed mover))
         l1 (vec/add (:location mover) v1)
@@ -79,7 +87,7 @@
 
 (defn setup []
   (js/createCanvas width height)
-  (swap! state assoc :movers (seed 20)))
+  (swap! state assoc :movers (seed 10)))
 
 (defn draw []
   (js/background 255)
