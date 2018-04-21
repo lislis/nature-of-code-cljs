@@ -37,30 +37,13 @@
   (for [i (range num)]
     (let [x (+ 30 (* 50 i))
           y (+ 20 (* i 20))
-          m (create x y 0 0 8 (js/random 20 40) 0 0.01 0)]
+          m (create x y 0 0 8 (js/random 20 40) 0 0 0)]
       m)))
-
-
-;; (defn apply-direct-force [mass force]
-;;   (vec/div force mass))
-
-;; (defn apply-forces [mover]
-;;   (let [force (calc-gravitation mover (:attractor @state))
-;;         a (apply-direct-force (:mass mover) force)
-;;         v (vec/limit (vec/add (:velocity mover) a) (:topspeed mover))
-;;         l (vec/add (:location mover) v)]
-;;     (create-vec l v
-;;                 (:topspeed mover)
-;;                 (:mass mover)
-;;                 (:angle mover)
-;;                 (:a-acceleration mover)
-;;                 (:a-vel mover))))
 
 (defn apply-a-vel [baton]
   (let [bacc (:a-acceleration baton)
         a-vel (+ (:a-velocity baton) bacc)
         angle (+ (:angle baton) a-vel)]
-    ;;(js/console.log a-vel)
     (create-vec (:location baton)
                 (:velocity baton)
                 (:topspeed baton)
@@ -72,9 +55,13 @@
 (defn apply-forces [mover]
   (let [force (calc-gravitation mover (:attractor @state))
         a (apply-direct-force (:mass mover) force)
+        acc (/ (:x a) 10)
+        avel (+ acc (:a-velocity mover))
+        avel2 (js/constrain avel -0.1 0.1)
+        angle (+ (:angle mover) avel2)
         v (vec/limit (vec/add (:velocity mover) a) (:topspeed mover))
         l (vec/add (:location mover) v)]
-    (create-vec l v (:topspeed mover) (:mass mover) 0 0 0)))
+    (create-vec l v (:topspeed mover) (:mass mover) angle acc avel)))
 
 
 (defn update-mover [mover]
@@ -94,19 +81,29 @@
 
 (defn setup []
   (js/createCanvas width height)
-  (swap! state assoc :movers (seed 10)))
+  (swap! state assoc :movers (seed 30)))
 
 (defn draw-mover [m]
   (let [location (:location m)
-        mass (:mass m)]
-    (js/stroke 180)
+        mass (:mass m)
+        angle (:angle m)
+        cos_a (js/cos angle)
+        sin_a (js/sin angle)
+        tx (:x location)
+        ty (:y location)]
+    (js/stroke 40)
+    (js/strokeWeight 3)
     (js/fill (- 255 (* 3 (js/ceil mass))))
-    (js/ellipse (:x location) (:y location) mass mass)))
+
+    (js/translate tx ty)
+    (js/rotate angle)
+    (js/rect (- (/ mass 2)) (- (/ mass 2)) mass mass)
+    (js/rotate (- angle))
+    (js/translate (- tx) (- ty))))
 
 (defn draw-attractor [attr]
   (js/fill 50)
   (js/ellipse (:x (:location attr)) (:y (:location attr)) (:mass attr) (:mass attr)))
-
 
 (defn draw []
   (js/background 255)
