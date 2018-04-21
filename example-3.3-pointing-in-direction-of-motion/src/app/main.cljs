@@ -38,17 +38,16 @@
   (vec/div force mass))
 
 (defn apply-forces [mover]
-  (let [;;force (calc-gravitation mover (:attractor @state))
-        mouse-l (vec/create js/mouseX js/mouseY)
+  (let [mouse-l (vec/create js/mouseX js/mouseY)
         move-l (:location mover)
+        move-v (:velocity mover)
         dir (vec/sub mouse-l move-l)
         force (vec/mult (vec/normalize dir) 0.5)
-        ;;a (apply-direct-force (:mass mover) force)
         a force
         aacc (/ (:x a) 10)
         avel (+ aacc (:a-velocity mover))
         avel2 (js/constrain avel -0.1 0.1)
-        angle (+ (:angle mover) avel2)
+        angle (js/atan2 (:y move-v) (:x move-v))
         v (vec/limit (vec/add (:velocity mover) a) (:topspeed mover))
         l (vec/add (:location mover) v)]
     (create-vec l v (:topspeed mover) (:mass mover) angle aacc avel)))
@@ -62,19 +61,17 @@
 
 (defn draw-mover [m]
   (let [location (:location m)
+        velocity (:velocity m)
         mass (:mass m)
         angle (:angle m)
-        cos_a (js/cos angle)
-        sin_a (js/sin angle)
         tx (:x location)
         ty (:y location)]
     (js/stroke 40)
     (js/strokeWeight 3)
     (js/fill (- 255 (* 3 (js/ceil mass))))
-
     (js/translate tx ty)
     (js/rotate angle)
-    (js/rect (- (/ mass 2)) (- (/ mass 2)) mass mass)
+    (js/rect (- (/ 30 2)) (- (/ 10 2)) 30 10)
     (js/resetMatrix)))
 
 (defn draw []
