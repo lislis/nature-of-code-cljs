@@ -35,8 +35,8 @@
 
 (defn seed [num]
   (for [i (range num)]
-    (let [x (+ 30 (* 50 i))
-          y (+ 20 (* i 20))
+    (let [x (js/random 0 width)
+          y (js/random 0 height)
           m (create x y 0 0 8 (js/random 20 40) 0 0 0)]
       m)))
 
@@ -44,6 +44,7 @@
   (let [bacc (:a-acceleration baton)
         a-vel (+ (:a-velocity baton) bacc)
         angle (+ (:angle baton) a-vel)]
+
     (create-vec (:location baton)
                 (:velocity baton)
                 (:topspeed baton)
@@ -73,7 +74,7 @@
 (defn calc-gravitation [mover attractor]
   (let [force (vec/sub (:location attractor) (:location mover))
         distance (js/constrain (vec/mag force) 20 50)
-        norm-force (vec/normalize force)
+        norm-force (- (vec/normalize force))
         strength (/ (* G (:mass attractor) (:mass mover))
                     (* distance distance))
         scaled-force (vec/mult force strength)]
@@ -81,7 +82,7 @@
 
 (defn setup []
   (js/createCanvas width height)
-  (swap! state assoc :movers (seed 30)))
+  (swap! state assoc :movers (seed 50)))
 
 (defn draw-mover [m]
   (let [location (:location m)
@@ -98,8 +99,7 @@
     (js/translate tx ty)
     (js/rotate angle)
     (js/rect (- (/ mass 2)) (- (/ mass 2)) mass mass)
-    (js/rotate (- angle))
-    (js/translate (- tx) (- ty))))
+    (js/resetMatrix)))
 
 (defn draw-attractor [attr]
   (js/fill 50)
@@ -111,7 +111,7 @@
         attr (:attractor @state)]
     (swap! state assoc :movers (mapv update-mover list))
 
-    (draw-attractor attr)
+    ;;(draw-attractor attr)
     (dorun
      (for [m list]
        (draw-mover m)))))
