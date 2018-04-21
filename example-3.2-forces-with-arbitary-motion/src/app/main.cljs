@@ -40,19 +40,6 @@
           m (create x y 0 0 8 (js/random 20 40) 0 0 0)]
       m)))
 
-(defn apply-a-vel [baton]
-  (let [bacc (:a-acceleration baton)
-        a-vel (+ (:a-velocity baton) bacc)
-        angle (+ (:angle baton) a-vel)]
-
-    (create-vec (:location baton)
-                (:velocity baton)
-                (:topspeed baton)
-                (:mass baton)
-                angle
-                bacc
-                a-vel)))
-
 (defn apply-forces [mover]
   (let [force (calc-gravitation mover (:attractor @state))
         a (apply-direct-force (:mass mover) force)
