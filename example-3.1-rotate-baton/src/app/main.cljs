@@ -43,7 +43,7 @@
   (let [bacc (:a-acceleration baton)
         a-vel (+ (:a-velocity baton) bacc)
         angle (+ (:angle baton) a-vel)]
-    (js/console.log a-vel)
+    ;;(js/console.log a-vel)
     (create-vec (:location baton)
                 (:velocity baton)
                 (:topspeed baton)
