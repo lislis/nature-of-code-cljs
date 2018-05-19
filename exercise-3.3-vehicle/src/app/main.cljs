@@ -51,7 +51,7 @@
 
         v (vec/create vx vy)
         l (vec/add (:location mover) v)]
-    (js/console.log vmag vx vy)
+    (js/console.log aacc)
     (create-vec l v (:topspeed mover) (:mass mover) angle 0 0 vmag)))
 
 (defn update-mover [mover]
@@ -86,8 +86,9 @@
     (js/strokeWeight 3)
     (js/fill (- 255 (* 3 (js/ceil mass))))
     (js/translate tx ty)
-    (js/rotate angle)
+    (js/rotate (+ angle (js/radians 90)))
     (draw-car)
+
     (js/resetMatrix)))
 
 (defn draw []
@@ -100,22 +101,22 @@
 
 (defn steer-left [mover]
   (let [a (:a-acceleration mover)
-        new-a (- a 0.1)]
+        new-a (- a 0.2)]
     (assoc mover :a-acceleration new-a)))
 
 (defn steer-right [mover]
   (let [a (:a-acceleration mover)
-        new-a (+ a 0.1)]
+        new-a (+ a 0.2)]
     (assoc mover :a-acceleration new-a)))
 
 (defn accelerate [mover]
   (let [a (:velocity-mag mover)
-        new-a (+ a 0.5)]
+        new-a (+ a 0.2)]
     (assoc mover :velocity-mag new-a)))
 
 (defn decelerate [mover]
   (let [a (:velocity-mag mover)
-        new-a (- a 0.5)]
+        new-a (- a 0.2)]
     (assoc mover :velocity-mag new-a)))
 
 (defn steer [direction]
